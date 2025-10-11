@@ -1,0 +1,1 @@
+Change wallpaper automatically. Fetch the NASA’s Astronomy Picture of the Day and set it as my desktop wallpaper on my mac
