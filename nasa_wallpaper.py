@@ -48,13 +48,6 @@ def download_image(url, stem, out_dir=Path(".")):
     jpg_path.write_bytes(r.content)
     return jpg_path
 
-# def convert_image(image_path): 
-#    image_path = Path(image_path)
-#    png_path = image_path.with_suffix(".png")
-#    with Image.open(image_path) as im:
-#        im.save(png_path)
-#    return png_path
-
 def set_wallpaper(path):
     subprocess.run(["wallpaper", "set", str(path)], check=True)
     print("wallpaper set on all screens")
@@ -76,7 +69,6 @@ def run(api_key, date=None, out_dir=Path(".")):
         path = out_dir / f"{date}.jpg"
         print(f"{date}: Image already exists in {out_dir} as {date}")
     else:    
-        # png = convert_image(saved)
         print(f"Saved JPG to {path}. Title: {title}")
 
     set_wallpaper(path)
