@@ -66,7 +66,7 @@ def run(api_key, date=None, out_dir=Path(".")):
     
     saved = download_image(img_url, date, out_dir=out_dir)
     if saved is None:
-        print(f"{date}: Image already exists as {out_dir / (date + '.jpg')}")
+        print(f"{date}: Image already exists in {out_dir} as {date}")
         return
     
     png = convert_image(saved)
