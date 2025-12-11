@@ -1,6 +1,5 @@
-import os, requests, json
+import os, requests
 from pathlib import Path
-from PIL import Image
 from datetime import date
 import subprocess
 
