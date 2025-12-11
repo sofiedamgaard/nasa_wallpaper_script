@@ -2,6 +2,7 @@ import os, requests, json
 from pathlib import Path
 from PIL import Image
 from datetime import date
+import subprocess
 
 def get_data(api_key, date=None, timeout=60):
     params = {"api_key": api_key}
@@ -47,12 +48,16 @@ def download_image(url, stem, out_dir=Path(".")):
     jpg_path.write_bytes(r.content)
     return jpg_path
 
-def convert_image(image_path):
-    image_path = Path(image_path)
-    png_path = image_path.with_suffix(".png")
-    with Image.open(image_path) as im:
-        im.save(png_path)
-    return png_path
+# def convert_image(image_path): 
+#    image_path = Path(image_path)
+#    png_path = image_path.with_suffix(".png")
+#    with Image.open(image_path) as im:
+#        im.save(png_path)
+#    return png_path
+
+def set_wallpaper(path):
+    subprocess.run(["wallpaper", "set", str(path)], check=True)
+    print("wallpaper set on all screens")
 
 def run(api_key, date=None, out_dir=Path(".")):
     resp = get_data(api_key, date=date)
@@ -64,15 +69,21 @@ def run(api_key, date=None, out_dir=Path(".")):
         print(f"{date}: Not an image (media_type={get_media_type(resp)})")
         return
     
-    saved = download_image(img_url, date, out_dir=out_dir)
-    if saved is None:
-        print(f"{date}: Image already exists in {out_dir} as {date}")
-        return
+    out_dir = Path(out_dir)
+    path = download_image(img_url, date, out_dir=out_dir)
     
-    png = convert_image(saved)
-    print(f"Saved JPEG to {saved} and PNG to {png}. Title: {title}")
+    if path is None:
+        path = out_dir / f"{date}.jpg"
+        print(f"{date}: Image already exists in {out_dir} as {date}")
+    else:    
+        # png = convert_image(saved)
+        print(f"Saved JPG to {path}. Title: {title}")
 
+    set_wallpaper(path)
+ 
 if __name__ == "__main__":
     API_KEY = os.getenv("NASA_API_KEY")
+    if not API_KEY:
+        raise RuntimeError("error: Environment variable NASA_API_KEY is not set")
     today = date.today()
     run(API_KEY, today, out_dir="images")
