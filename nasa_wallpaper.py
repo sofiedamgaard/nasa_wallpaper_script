@@ -67,6 +67,19 @@ def set_wallpaper(path):
     subprocess.run(["osascript", "-e", applescript], check=True)
     print("wallpaper set on all desktops/spaces", flush=True)
 
+def note_description(explanation):
+    if not explanation:
+        return
+    
+    explanation = explanation.replace("\\", "\\\\").replace('"', '\\"')
+
+    applescript = f'''
+tell application "Stickies"
+    make new note with properties {{contents:"{explanation}"}}
+end tell
+'''
+    subprocess.run(["osascript", "-e", applescript], check=True)
+
 FALLBACK_DATE = "2025-12-17"
 
 def fallback_image_path(out_dir=Path("."), fallback_date=FALLBACK_DATE):
@@ -80,7 +93,7 @@ def fallback_image_path(out_dir=Path("."), fallback_date=FALLBACK_DATE):
 
 def run(api_key, date=None, out_dir=Path("."), fallback_date=FALLBACK_DATE):
     out_dir = Path(out_dir)
-    
+
     resp = get_data(api_key, date=date)
 
     if resp is None:
@@ -105,6 +118,9 @@ def run(api_key, date=None, out_dir=Path("."), fallback_date=FALLBACK_DATE):
         print(f"Saved JPG to {path}. Title: {title}")
 
     set_wallpaper(path)
+
+    explanation = get_explanation(resp)
+    note_description(explanation)
 
 if __name__ == "__main__":
     API_KEY = os.getenv("NASA_API_KEY")
