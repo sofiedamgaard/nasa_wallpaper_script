@@ -67,8 +67,27 @@ def set_wallpaper(path):
     subprocess.run(["osascript", "-e", applescript], check=True)
     print("wallpaper set on all desktops/spaces", flush=True)
 
-def run(api_key, date=None, out_dir=Path(".")):
+FALLBACK_DATE = "2025-12-17"
+
+def fallback_image_path(out_dir=Path("."), fallback_date=FALLBACK_DATE):
+    out_dir = Path(out_dir)
+    path = out_dir / f"{fallback_date}.jpg"
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Fallback image not found: {path}"
+        )
+    return path
+
+def run(api_key, date=None, out_dir=Path("."), fallback_date=FALLBACK_DATE):
+    out_dir = Path(out_dir)
+    
     resp = get_data(api_key, date=date)
+
+    if resp is None:
+        print("Using fallback wallpaper because NASA did not respond", flush=True)
+        set_wallpaper(fallback_image_path(out_dir, fallback_date))
+        return
+    
     date = get_date(resp)
     title = get_title(resp)
     img_url = get_image_url(resp)
@@ -77,7 +96,6 @@ def run(api_key, date=None, out_dir=Path(".")):
         print(f"{date}: Not an image (media_type={get_media_type(resp)})")
         return
     
-    out_dir = Path(out_dir)
     path = download_image(img_url, date, out_dir=out_dir)
     
     if path is None:
