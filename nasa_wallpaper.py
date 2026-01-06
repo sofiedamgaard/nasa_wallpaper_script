@@ -7,9 +7,14 @@ def get_data(api_key, date=None, timeout=60):
     params = {"api_key": api_key}
     if date:
         params["date"] = date
-    r = requests.get("https://api.nasa.gov/planetary/apod", params=params, timeout=timeout)
-    r.raise_for_status()
-    return r.json()
+
+    try:
+        r = requests.get("https://api.nasa.gov/planetary/apod", params=params, timeout=timeout)
+        r.raise_for_status()
+        return r.json()
+    except requests.exceptions.RequestException as e:
+        print(f"NASA APOD request failed: {e}", flush=True)
+        return None
 
 def get_date(response): return response.get("date")
 
