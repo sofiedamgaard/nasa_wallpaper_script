@@ -48,8 +48,19 @@ def download_image(url, stem, out_dir=Path(".")):
     return jpg_path
 
 def set_wallpaper(path):
-    subprocess.run(["wallpaper", "set", str(path)], check=True)
-    print("wallpaper set on all screens")
+    p = Path(path).expanduser().resolve()
+    if not p.exists():
+        raise FileNotFoundError(f"Wallpaper file does not exist: {p}")
+
+    applescript = f'''
+    tell application "System Events"
+        repeat with d in desktops
+            set picture of d to "{str(p)}"
+        end repeat
+    end tell
+    '''
+    subprocess.run(["osascript", "-e", applescript], check=True)
+    print("wallpaper set on all desktops/spaces", flush=True)
 
 def run(api_key, date=None, out_dir=Path(".")):
     resp = get_data(api_key, date=date)
@@ -71,7 +82,7 @@ def run(api_key, date=None, out_dir=Path(".")):
         print(f"Saved JPG to {path}. Title: {title}")
 
     set_wallpaper(path)
- 
+
 if __name__ == "__main__":
     API_KEY = os.getenv("NASA_API_KEY")
     if not API_KEY:
